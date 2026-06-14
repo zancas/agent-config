@@ -50,3 +50,26 @@ when that's genuinely shorter and clearer for a simple task.
   `#![forbid(unsafe_code)]` at the crate top (after the shebang and `//!` doc /
   `cargo` block, before the first `use`). `forbid` — not `deny` — so it can't be
   locally overridden.
+
+## Tooling preferences
+
+### Rust code: reach for the Rust toolchain first
+
+When operating against Rust source, prefer the language's own standard tooling
+over generic text manipulation, wherever possible:
+
+- **Understanding, navigation, refactors:** use the LSP (rust-analyzer) —
+  go-to-definition, find-references, rename, hover, workspace symbols,
+  diagnostics — instead of grepping for symbols by hand.
+- **Build / check / test / run / format / lint:** use `cargo` (`cargo check`,
+  `cargo build`, `cargo test`, `cargo run`, `cargo clippy`, `cargo fmt`) and
+  `rustc`, rather than ad-hoc parsing of source or output.
+
+Only fall back to generic tooling (Python, `rg`, `sed`, `awk`, etc.) when there
+is genuinely no Rust-tool-specific way to accomplish the task.
+
+### Search: ripgrep, always
+
+Use `rg` (ripgrep) instead of `grep` in every case — it is faster, respects
+`.gitignore`, and has saner defaults. If `rg` is missing, install it with
+`cargo install ripgrep`.

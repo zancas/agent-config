@@ -79,6 +79,21 @@ fn have(cmd: &str) -> bool {
         .unwrap_or(false)
 }
 
+/// Ensure ripgrep (`rg`) is installed — preferred over grep everywhere.
+/// Agent-agnostic, so this runs regardless of which agents are configured.
+fn ensure_ripgrep() {
+    println!("Ensuring ripgrep (rg) is installed ...");
+    if have("rg") {
+        println!("  ripgrep already installed");
+    } else if have("cargo") {
+        if !run("cargo", &["install", "ripgrep", "--locked"]) {
+            eprintln!("  warning: `cargo install ripgrep` failed");
+        }
+    } else {
+        eprintln!("  warning: cargo not found; install Rust + ripgrep for `rg`");
+    }
+}
+
 /// Install the Claude Code (claude) agent: settings, hooks, shared
 /// instructions (as CLAUDE.md), grill skills, and the Topiary formatter.
 fn install_claude(repo: &Path) {
@@ -146,6 +161,9 @@ fn main() {
         );
         std::process::exit(1);
     }
+
+    // Agent-agnostic tooling.
+    ensure_ripgrep();
 
     // One arm per supported agent. Add more here as agents/<name>/ are added.
     install_claude(&repo);
