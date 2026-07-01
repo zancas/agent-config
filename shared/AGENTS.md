@@ -27,29 +27,29 @@ without having to mentally parse it.
 When a task calls for a script, choose the language by these rules, in priority
 order (a higher rule wins when they conflict):
 
-1. **Checked into a repo → MUST be Rust (`rust-script`).** Anything committed —
-   hooks, installers, tooling kept on disk and re-run — is Rust. No Bash or
-   Python files get checked in. Use single-file `rust-script` (shebang
-   `#!/usr/bin/env rust-script`, inline `//! ```cargo` dependency block), or a
-   real Cargo project once it outgrows one file.
+1. **Checked into a repo → MUST be Rust, in the workbench crate.** Anything
+   committed — hooks, installers, tooling kept on disk and re-run — is Rust. No
+   Bash or Python files get checked in, and `rust-script` single-file scripts
+   are retired: put the logic in the repo's **workbench crate** (the Cargo crate
+   for developer/CI tooling). Small cargo-make task glue may stay bash; real
+   logic goes in the workbench crate.
 2. **Long-lived system/config scripts** (agent hooks, tooling kept on disk and
-   re-run over time) → **Rust / `rust-script`**, even if not yet committed.
+   re-run over time) → **Rust** (workbench crate), even if not yet committed.
 3. **Single-use throwaway scripts I read as a command proposal** (inline one-offs
    I approve in the moment) → **Python**, because it's the most readable at a
    glance for review — *except* when a simple proposal is more succinctly
    expressed in **Bash**, in which case use Bash.
-4. **Anything else / general scripting** → prefer `rust-script` or Python over
-   shell; avoid Bash for non-trivial logic.
+4. **Anything else / general scripting** → prefer Rust (workbench crate) or
+   Python over shell; avoid Bash for non-trivial logic.
 
 Net: committed/long-lived ⇒ Rust; quick proposals I review ⇒ Python, or Bash
 when that's genuinely shorter and clearer for a simple task.
 
 ### Rust conventions
 
-- Every rust-script (and Rust source generally) must forbid unsafe code: put
-  `#![forbid(unsafe_code)]` at the crate top (after the shebang and `//!` doc /
-  `cargo` block, before the first `use`). `forbid` — not `deny` — so it can't be
-  locally overridden.
+- Every Rust source file must forbid unsafe code: put `#![forbid(unsafe_code)]`
+  at the crate top (before the first `use`). `forbid` — not `deny` — so it can't
+  be locally overridden.
 
 ## Tooling preferences
 
