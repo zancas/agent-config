@@ -65,8 +65,46 @@ over generic text manipulation, wherever possible:
   `cargo build`, `cargo test`, `cargo run`, `cargo clippy`, `cargo fmt`) and
   `rustc`, rather than ad-hoc parsing of source or output.
 
-Only fall back to generic tooling (Python, `rg`, `sed`, `awk`, etc.) when there
-is genuinely no Rust-tool-specific way to accomplish the task.
+- **Dependency and manifest changes:** use `cargo add`, `cargo remove`, and
+  `cargo update` (with `--features`, `--optional`, `--dev` as needed), not
+  hand-edits or scripted rewrites of `Cargo.toml`.
+
+**Always prefer Rust-native tools in any domain where they are designed to
+operate.** Only fall back to generic tooling (Python, `rg`, `sed`, `awk`, etc.)
+when there is genuinely no Rust-tool-specific way to accomplish the task. In
+particular, never batch-edit Rust source or manifests with Python/sed sweeps
+when a cargo or rust-analyzer operation covers the job.
+
+**rust-analyzer cold-start gotcha.** On a large workspace, `workspaceSymbol`
+(and other index-wide queries) return *empty* — e.g. "No symbols found in
+workspace" — for the first seconds-to-minutes after the server starts, because
+the workspace symbol index is still building. This is **not** a "server down" or
+"symbol missing" result. Diagnose by running a *per-file* op first
+(`documentSymbol`/`hover`/`goToDefinition` at a known location): if that
+succeeds, the server is up and the empty `workspaceSymbol` just means the index
+isn't warm yet. Remedy: retry `workspaceSymbol` after a short delay, or use the
+per-file op meanwhile. Don't conclude a symbol doesn't exist from an empty
+`workspaceSymbol` on a cold index.
+
+Note the agent's LSP tool runs its *own* rust-analyzer process, independent of
+any editor's (Helix, VS Code, etc.) server on the same repo. So a warm editor
+LSP does **not** mean the agent's server is warm — it has its own cold-start.
+And two rust-analyzers indexing a large workspace at once contend for CPU/RAM,
+which slows indexing for both, lengthening the empty-`workspaceSymbol` window.
+
+**Verify your own edits with the toolchain.** Use the LSP and `cargo`
+(`cargo check`, `cargo clippy`, `cargo fmt`), `rustc` actively and wherever
+possible to confirm your changes compile and are clean — iterate on the errors
+before handing work back. Do not hand off a non-trivial change unverified on the
+theory that "the user runs their own pipeline."
+
+**But tests and commits are the user's to run.** The user prefers to run tests
+and create commits manually:
+- Running *fast* tests yourself is fine. Do **not** launch long-running test
+  jobs (full `cargo nextest run`, `cargo test`, integration/container suites)
+  without asking first. When you do run tests, use `cargo nextest run`, never
+  bare `cargo test`.
+- Propose commits; do not auto-commit or push unless explicitly asked.
 
 ### Search: ripgrep, always
 
