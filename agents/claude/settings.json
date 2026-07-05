@@ -12,6 +12,20 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/grill-session-start.rs"
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/rename-zellij-pane.rs"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/undo-rename-zellij-pane.rs"
           }
         ]
       }
