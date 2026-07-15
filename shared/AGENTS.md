@@ -22,6 +22,48 @@ it before approving, so optimize the command for a human, not just the shell.
 The goal: a person skimming the command should understand what it does and why
 without having to mentally parse it.
 
+## End every substantive reply with a recap
+
+Every substantive reply — anything reporting work done, findings, or a
+changed state, as opposed to a one-line answer — must end with a short
+recap section that a reader could use to reconstruct the session's state
+without scrolling back. The recap states:
+
+- The goal being pursued.
+- The phases completed so far, naming commits by hash where they exist.
+- The current state of the working tree, branches, and any external
+  artifacts (pull requests, issues, published documents).
+- The next actions, and who drives each one (the user or the agent).
+
+If the reply was interrupted or the work is partially applied, the recap
+must say exactly what is applied, what is verified, and what is neither.
+
+## Written English style
+
+Apply the guidance of Strunk and White's *The Elements of Style* to all
+textual English output: conversational responses, commit messages, pull
+request descriptions, documentation comments, CHANGELOG entries, specs,
+and ADRs.
+
+- Write full, grammatically correct sentences with proper punctuation.
+- Use the active voice and make definite assertions.
+- Omit needless words, but never at the cost of a sentence fragment.
+- Do not write telegraphic fragments, dash-chained clauses, or bullet
+  lists of sentence fragments. When a list genuinely clarifies, each
+  item must be a complete sentence.
+
+### Commit messages
+
+- The subject line follows the conventional-commit imperative
+  (`feat!: remove the guard`); it is the one place a sentence fragment
+  is expected, per git convention.
+- The body is prose: full sentences organized into paragraphs, one
+  topic per paragraph. Prefer paragraphs over bullet lists; use a list
+  only when the items are truly parallel, and then write each item as
+  a complete sentence.
+- State what the change does and why in declarative sentences. Name
+  the issues, specs, and ADRs the change serves.
+
 ## Scripting language preference
 
 When a task calls for a script, choose the language by these rules, in priority
@@ -69,6 +111,17 @@ over generic text manipulation, wherever possible:
 - **Understanding, navigation, refactors:** use the LSP (rust-analyzer) —
   go-to-definition, find-references, rename, hover, workspace symbols,
   diagnostics — instead of grepping for symbols by hand.
+- **NEVER use grep/rg to decide whether a Rust SYMBOL exists.** Text search
+  answers "does this text occur," not "does this symbol exist":
+  macro-generated items (getters from `macro_rules!` like `copy_getters!`,
+  derive output, builder methods) never appear as literal source text, so a
+  grep for `pub fn name` proves nothing. This caused a real wrong conclusion
+  on 2026-07-07 (`Zebrad::rpc_listen_port()` reported missing when a macro
+  generated it). For symbol existence and location, use rust-analyzer
+  (hover/go-to-definition at a typed use site, workspace symbols for
+  workspace crates) or ask the compiler by writing the call and running
+  `cargo check`. rg stays appropriate for plain text: log lines, string
+  literals, comments, config.
 - **Build / check / test / run / format / lint:** use `cargo` (`cargo check`,
   `cargo build`, `cargo test`, `cargo run`, `cargo clippy`, `cargo fmt`) and
   `rustc`, rather than ad-hoc parsing of source or output.
