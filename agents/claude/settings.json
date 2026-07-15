@@ -1,4 +1,6 @@
 {
+  "model": "claude-fable-5[1m]",
+  "disableClaudeAiConnectors": true,
   "hooks": {
     "SessionStart": [
       {
@@ -40,13 +42,15 @@
       }
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "/home/nattyb/.claude/statusline-role.rs"
+  },
   "enabledPlugins": {
     "rust-analyzer-lsp@claude-plugins-official": true,
     "github@claude-plugins-official": true,
     "clangd-lsp@claude-plugins-official": true
   },
   "effortLevel": "high",
-  "tui": "fullscreen",
-  "model": "claude-fable-5[1m]",
-  "disableClaudeAiConnectors": true
+  "tui": "fullscreen"
 }
