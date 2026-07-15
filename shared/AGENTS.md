@@ -119,3 +119,9 @@ and create commits manually:
 Use `rg` (ripgrep) instead of `grep` in every case — it is faster, respects
 `.gitignore`, and has saner defaults. If `rg` is missing, install it with
 `cargo install ripgrep`.
+
+Never pass `-rn` (or any short-flag cluster containing `r`) to `rg`. In
+ripgrep, `-r` is `--replace`, not grep's `--recursive`, so `-rn` parses as
+`--replace n` and silently rewrites every match to the literal letter "n".
+ripgrep recurses by default; use `rg -n PATTERN` instead, and write
+`--replace` out in full on the rare occasion you actually mean it.
